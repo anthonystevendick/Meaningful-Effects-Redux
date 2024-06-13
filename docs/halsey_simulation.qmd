@@ -1,0 +1,117 @@
+---
+title: "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)"
+author: "Anthony Dick"
+format:
+  html:
+    code-fold: true
+---
+
+------------------------------------------------------------------------
+
+## Load required libraries, establish means and standard deviations, calculate effect size
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(pwr)
+set.seed(123)
+num_simulations <- 1000
+
+population1_mean <- 0
+population1_sd <- 1
+
+population2_mean <- 0.5
+population2_sd <- 1
+
+sample_sizes <- c(10, 30, 100, 11865) #sample sizes to test
+
+effect_size <- population2_mean - population1_mean # calculate the effect size
+```
+
+## Provide a function to calculate power
+
+```{r}
+calculate_power <- function(sample_size) {
+  power <- pwr.t.test(n = sample_size, d = effect_size, sig.level = 0.05, type = "two.sample")$power
+  return(power)
+}
+```
+
+## Provide a function to calculate statistical power for each sample size
+
+```{r}
+
+powers <- sapply(sample_sizes, calculate_power)
+powers <- sprintf("%.2f", as.numeric(powers))
+
+```
+
+## Provide a function to calculate confidence interval range
+
+```{r}
+calculate_ci_range <- function(sample1, sample2) {
+  ci_range <- abs(mean(sample2) - mean(sample1)) + qnorm(0.975) * sqrt(var(sample1)/length(sample1) + var(sample2)/length(sample2))
+  return(ci_range)
+}
+```
+
+## Perform simulations for each sample size
+
+```{r}
+ci_ranges <- matrix(NA, nrow = num_simulations * length(sample_sizes), ncol = 1) # Create a matrix to store confidence interval ranges, initialized with NA
+sample_sizes_rep <- numeric(num_simulations * length(sample_sizes)) # Create a numeric vector to store sample sizes repeated for each simulation
+counter <- 1 # Initialize a counter to keep track of the current position in the matrices
+
+for (i in 1:length(sample_sizes)) { # Loop over each sample size
+  sample_size <- sample_sizes[i] # Get the current sample size
+  
+  for (j in 1:num_simulations) { # Loop over each simulation
+    sample1 <- rnorm(sample_size, mean = population1_mean, sd = population1_sd) # Generate random sample from the first normal distribution
+    sample2 <- rnorm(sample_size, mean = population2_mean, sd = population2_sd) # Generate random sample from the second normal distribution
+    
+    ci_ranges[counter] <- calculate_ci_range(sample1, sample2) # Calculate the confidence interval range and store it in the matrix
+    sample_sizes_rep[counter] <- sample_size # Store the current sample size in the corresponding vector
+    counter <- counter + 1 # Increment the counter
+  }
+}
+
+```
+
+## Set up data for ggplot2
+
+```{r}
+#| echo: true
+df <- data.frame(Sample_Size = sample_sizes_rep, CI_Range = ci_ranges, Power = rep(powers, each = num_simulations)) # create a data frame for ggplot2
+
+slytherin <- "#1A472A" # define Slytherin color
+
+```
+
+## Plot histograms with ggplot2
+
+```{r}
+p <- ggplot(df, aes(x = CI_Range)) +
+  geom_histogram(fill = slytherin, color = "black", binwidth = 0.1) +
+  facet_wrap(~ Sample_Size, scales = "free", labeller = labeller(Sample_Size = function(x) paste("n = ", x, ", Theoretical Power:", powers[x == sample_sizes]))) +
+  labs(title = "Distribution of 95% CI Ranges for Different \n Sample Sizes",
+       x = "Width of confidence interval, units",
+       y = "Frequency") +
+  theme_bw() +
+  theme(text = element_text(size = 18),
+        panel.border = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line.x = element_line(), axis.line.y = element_line()) +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(0, 3, by = 0.5)) +
+  coord_cartesian(xlim = c(0, 3.0))
+print(p)
+```
+
+## Save plots if needed
+
+```{r}
+#Save plots if needed
+ggsave("halsey_distribution_plot.tiff", p, width = 10, height = 8, units = "in", dpi = 600)
+ggsave("halsey_distribution_plot.png", p, width = 10, height = 8, units = "in", dpi = 600)
+```
