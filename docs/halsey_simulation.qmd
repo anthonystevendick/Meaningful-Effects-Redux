@@ -1,6 +1,6 @@
 ---
 title: "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)"
-author: "Anthony Dick"
+author: "Anthony Steven Dick"
 format:
   html:
     code-fold: true

@@ -18,5 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+[Barplot and Scatterplot Comparing Sex Differences in Height](barplot_scatterplot.html)
+
 [Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)](halsey_simulation.html)
 
