@@ -22,3 +22,5 @@ knitr::opts_chunk$set(
 
 [Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)](halsey_simulation.html)
 
+[Plots of Power Curves](power_curves.html)
+
