@@ -4,6 +4,7 @@ project:
 
 website:
   title: "Meaningful Associations Redux"
+  site-url: https://anthonystevendick.github.io/Meaningful-Effects-Redux
   navbar:
     left:
       - href: index.qmd
