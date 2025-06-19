@@ -182,8 +182,8 @@
     "text": "Combine Plots and Save if Needed\n\n\nCode\n# Combine plots using patchwork\ncombined_plot &lt;- plot_r + plot_d + plot_layout(ncol = 2)\n\n# Add single legend at the bottom\ncombined_plot &lt;- combined_plot + theme(legend.position = \"right\", text = element_text(size = 16))\n\n# Display the combined plot\nprint(combined_plot)\n\n\n\n\n\n\n\n\n\nCode\n# Save the combined plot to a .tiff file with 600 dpi resolution\nggsave(\"combined_plot.tiff\", plot = combined_plot, dpi = 600)\n\n\nSaving 7 x 5 in image\n\n\nCode\n# Save the combined plot to a .eps file\nggsave(\"combined_plot.eps\", plot = combined_plot, device = \"eps\")\n\n\nSaving 7 x 5 in image"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
+    "objectID": "index_land.html",
+    "href": "index_land.html",
     "title": "Meaningful Associations Redux",
     "section": "",
     "text": "Barplot and Scatterplot Comparing Sex Differences in Height\nPlots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)\nPlots of Power Curves\nEffect Size Overlap Plots"
