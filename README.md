@@ -12,7 +12,7 @@ Shannon M. Pruden, Samuel Hawes, Raul Gonzalez, Angela R. Laird, Paulo Graziano
 
 For **simulated plots**, the rendered figures and associated R code are available at:
 
-➡️ [https://anthonystevendick.github.io/Meaningful-Effects-Redux/index.html](https://anthonystevendick.github.io/Meaningful-Effects-Redux/index.html)
+➡️ [https://anthonystevendick.github.io/Meaningful-Effects-Redux/index_land.html](https://anthonystevendick.github.io/Meaningful-Effects-Redux/index_land.html)
 
 ---
 
