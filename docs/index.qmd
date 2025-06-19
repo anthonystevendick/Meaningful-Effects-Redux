@@ -24,3 +24,5 @@ knitr::opts_chunk$set(
 
 [Plots of Power Curves](power_curves.html)
 
+[Effect Size Overlap Plots](effect_size_overlap.html)
+
