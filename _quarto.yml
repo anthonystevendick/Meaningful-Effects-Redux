@@ -16,9 +16,3 @@ website:
         text: Power Curves
       - href: barplot_scatterplot.qmd
         text: Barplot
-
-format:
-  html:
-    theme: cosmo
-    toc: true
-
