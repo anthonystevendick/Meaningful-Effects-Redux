@@ -8,16 +8,17 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: barplot_scatterplot.qmd
-        text: Sex × Height
-      - href: halsey_simulation.qmd
-        text: Halsey CIs
-      - href: power_curves.qmd
-        text: Power Curves
       - href: effect_size_overlap.qmd
         text: Overlap Plot
+      - href: halsey_simulation.qmd
+        text: Halsey Simulation
+      - href: power_curves.qmd
+        text: Power Curves
+      - href: barplot_scatterplot.qmd
+        text: Barplot
 
 format:
   html:
     theme: cosmo
     toc: true
+
