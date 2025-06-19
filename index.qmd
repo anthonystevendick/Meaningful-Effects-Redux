@@ -1,0 +1,28 @@
+---
+title: "Meaningful Associations Redux"
+author: "Anthony Steven Dick"
+---
+
+```{r}
+#| echo: FALSE # The content of this code block will not be shown when rendered
+#| output: FALSE # Output from this code block will not be shown when rendered
+
+# This code configures knitr code chunk options
+
+knitr::opts_chunk$set(
+    echo = T, message = F, warning = F, error = F, output = T,
+    comment = NA, cache = T,
+    R.options = list(width = 220, digits = 3),
+    fig.align = "center",
+    out.width = "75%", fig.asp = .75
+)
+```
+
+[Barplot and Scatterplot Comparing Sex Differences in Height](barplot_scatterplot.html)
+
+[Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)](halsey_simulation.html)
+
+[Plots of Power Curves](power_curves.html)
+
+[Effect Size Overlap Plots](effect_size_overlap.html)
+

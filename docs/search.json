@@ -1,0 +1,191 @@
+[
+  {
+    "objectID": "halsey_simulation.html#load-required-libraries-establish-means-and-standard-deviations-calculate-effect-size",
+    "href": "halsey_simulation.html#load-required-libraries-establish-means-and-standard-deviations-calculate-effect-size",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Load required libraries, establish means and standard deviations, calculate effect size",
+    "text": "Load required libraries, establish means and standard deviations, calculate effect size\n\n\nCode\nknitr::opts_chunk$set(echo = TRUE)\nlibrary(ggplot2)\nlibrary(pwr)\nset.seed(123)\nnum_simulations &lt;- 1000\n\npopulation1_mean &lt;- 0\npopulation1_sd &lt;- 1\n\npopulation2_mean &lt;- 0.5\npopulation2_sd &lt;- 1\n\nsample_sizes &lt;- c(10, 30, 100, 11865) #sample sizes to test\n\neffect_size &lt;- population2_mean - population1_mean # calculate the effect size"
+  },
+  {
+    "objectID": "halsey_simulation.html#provide-a-function-to-calculate-power",
+    "href": "halsey_simulation.html#provide-a-function-to-calculate-power",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Provide a function to calculate power",
+    "text": "Provide a function to calculate power\n\n\nCode\ncalculate_power &lt;- function(sample_size) {\n  power &lt;- pwr.t.test(n = sample_size, d = effect_size, sig.level = 0.05, type = \"two.sample\")$power\n  return(power)\n}"
+  },
+  {
+    "objectID": "halsey_simulation.html#provide-a-function-to-calculate-statistical-power-for-each-sample-size",
+    "href": "halsey_simulation.html#provide-a-function-to-calculate-statistical-power-for-each-sample-size",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Provide a function to calculate statistical power for each sample size",
+    "text": "Provide a function to calculate statistical power for each sample size\n\n\nCode\npowers &lt;- sapply(sample_sizes, calculate_power)\npowers &lt;- sprintf(\"%.2f\", as.numeric(powers))"
+  },
+  {
+    "objectID": "halsey_simulation.html#provide-a-function-to-calculate-confidence-interval-range",
+    "href": "halsey_simulation.html#provide-a-function-to-calculate-confidence-interval-range",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Provide a function to calculate confidence interval range",
+    "text": "Provide a function to calculate confidence interval range\n\n\nCode\ncalculate_ci_range &lt;- function(sample1, sample2) {\n  ci_range &lt;- abs(mean(sample2) - mean(sample1)) + qnorm(0.975) * sqrt(var(sample1)/length(sample1) + var(sample2)/length(sample2))\n  return(ci_range)\n}"
+  },
+  {
+    "objectID": "halsey_simulation.html#perform-simulations-for-each-sample-size",
+    "href": "halsey_simulation.html#perform-simulations-for-each-sample-size",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Perform simulations for each sample size",
+    "text": "Perform simulations for each sample size\n\n\nCode\nci_ranges &lt;- matrix(NA, nrow = num_simulations * length(sample_sizes), ncol = 1) # Create a matrix to store confidence interval ranges, initialized with NA\nsample_sizes_rep &lt;- numeric(num_simulations * length(sample_sizes)) # Create a numeric vector to store sample sizes repeated for each simulation\ncounter &lt;- 1 # Initialize a counter to keep track of the current position in the matrices\n\nfor (i in 1:length(sample_sizes)) { # Loop over each sample size\n  sample_size &lt;- sample_sizes[i] # Get the current sample size\n  \n  for (j in 1:num_simulations) { # Loop over each simulation\n    sample1 &lt;- rnorm(sample_size, mean = population1_mean, sd = population1_sd) # Generate random sample from the first normal distribution\n    sample2 &lt;- rnorm(sample_size, mean = population2_mean, sd = population2_sd) # Generate random sample from the second normal distribution\n    \n    ci_ranges[counter] &lt;- calculate_ci_range(sample1, sample2) # Calculate the confidence interval range and store it in the matrix\n    sample_sizes_rep[counter] &lt;- sample_size # Store the current sample size in the corresponding vector\n    counter &lt;- counter + 1 # Increment the counter\n  }\n}"
+  },
+  {
+    "objectID": "halsey_simulation.html#set-up-data-for-ggplot2",
+    "href": "halsey_simulation.html#set-up-data-for-ggplot2",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Set up data for ggplot2",
+    "text": "Set up data for ggplot2\n\n\nCode\ndf &lt;- data.frame(Sample_Size = sample_sizes_rep, CI_Range = ci_ranges, Power = rep(powers, each = num_simulations)) # create a data frame for ggplot2\n\nslytherin &lt;- \"#1A472A\" # define Slytherin color"
+  },
+  {
+    "objectID": "halsey_simulation.html#plot-histograms-with-ggplot2",
+    "href": "halsey_simulation.html#plot-histograms-with-ggplot2",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Plot histograms with ggplot2",
+    "text": "Plot histograms with ggplot2\n\n\nCode\np &lt;- ggplot(df, aes(x = CI_Range)) +\n  geom_histogram(fill = slytherin, color = \"black\", binwidth = 0.1) +\n  facet_wrap(~ Sample_Size, scales = \"free\", labeller = labeller(Sample_Size = function(x) paste(\"n = \", x, \", Theoretical Power:\", powers[x == sample_sizes]))) +\n  labs(title = \"Distribution of 95% CI Ranges for Different \\n Sample Sizes\",\n       x = \"Width of confidence interval, units\",\n       y = \"Frequency\") +\n  theme_bw() +\n  theme(text = element_text(size = 18),\n        panel.border = element_blank(),\n        panel.grid.minor = element_blank(),\n        axis.line.x = element_line(), axis.line.y = element_line()) +\n  theme(strip.text = element_text(size = 12, face = \"bold\")) +\n  theme(legend.position = \"none\") +\n  scale_x_continuous(breaks = seq(0, 3, by = 0.5)) +\n  coord_cartesian(xlim = c(0, 3.0))\nprint(p)"
+  },
+  {
+    "objectID": "halsey_simulation.html#save-plots-if-needed",
+    "href": "halsey_simulation.html#save-plots-if-needed",
+    "title": "Plots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)",
+    "section": "Save plots if needed",
+    "text": "Save plots if needed\n\n\nCode\n#Save plots if needed\nggsave(\"halsey_distribution_plot.tiff\", p, width = 10, height = 8, units = \"in\", dpi = 600)\nggsave(\"halsey_distribution_plot.png\", p, width = 10, height = 8, units = \"in\", dpi = 600)"
+  },
+  {
+    "objectID": "effect_size_overlap.html#figure-6a-two-distributions-by-group",
+    "href": "effect_size_overlap.html#figure-6a-two-distributions-by-group",
+    "title": "Simulated Overlap for d = 0.08",
+    "section": "2 Figure 6A: Two Distributions by Group",
+    "text": "2 Figure 6A: Two Distributions by Group\n\nd_long %&gt;%\n  ggplot(aes(x, y, color = Distribution)) + \n  geom_point(alpha = 0.5, size = 1.3) +\n  facet_wrap(~ Distribution, ncol = 1) +\n  labs(title = \"Distribution of Outcomes in the Non-Exposed and PCE Groups\",\n       subtitle = \"Cohen's d = 0.08; Each point represents one person\") +\n  scale_color_rpsy +\n  theme_bw() +\n  theme(\n    text = element_text(size = 18),\n    panel.border = element_blank(),\n    panel.grid.minor = element_blank(),\n    axis.line.x = element_line(),\n    axis.line.y = element_line(),\n    axis.title = element_blank()\n  )"
+  },
+  {
+    "objectID": "effect_size_overlap.html#figure-6b-overlap-visualization",
+    "href": "effect_size_overlap.html#figure-6b-overlap-visualization",
+    "title": "Simulated Overlap for d = 0.08",
+    "section": "3 Figure 6B: Overlap Visualization",
+    "text": "3 Figure 6B: Overlap Visualization\n\nd_long %&gt;%\n  ggplot(aes(x, y, color = Distribution)) +\n  geom_point(alpha = 0.5, size = 1.3) +\n  labs(title = \"Overlap of Two Distributions\", subtitle = \"Cohen's d = 0.08\") +\n  scale_color_rpsy +\n  theme_bw() +\n  theme(\n    text = element_text(size = 18),\n    panel.border = element_blank(),\n    panel.grid.minor = element_blank(),\n    axis.line.x = element_line(),\n    axis.line.y = element_line(),\n    axis.title = element_blank()\n  )"
+  },
+  {
+    "objectID": "effect_size_overlap.html#figure-6c-annotated-percent-overlap",
+    "href": "effect_size_overlap.html#figure-6c-annotated-percent-overlap",
+    "title": "Simulated Overlap for d = 0.08",
+    "section": "4 Figure 6C: Annotated Percent Overlap",
+    "text": "4 Figure 6C: Annotated Percent Overlap\nlabels &lt;- d_long %&gt;% group_by(overlap) %&gt;% summarise(n = n(), .groups = “drop”) %&gt;% mutate( prop = paste0(round(n / sum(n) * 100, 1), “%”), x = c(1.5, 0.25, -1, 0.25), y = c(0.2, 0.25, 0.2, 0.2) )\nd_long %&gt;% ggplot(aes(x, y, color = overlap)) + geom_point(alpha = 0.5) + geom_label(data = labels, aes(x = x, y = y, label = prop, color = overlap), vjust = “center”, show.legend = FALSE, size = 5) + labs(title = “Percentage of Observations in Each Area”, subtitle = “Frequency Understanding of Overlap”) + scale_color_rpsy + theme_bw() + theme( text = element_text(size = 18), panel.border = element_blank(), panel.grid.minor = element_blank(), axis.line.x = element_line(), axis.line.y = element_line(), axis.title = element_blank() )"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#define-means-and-standard-errors",
+    "href": "barplot_scatterplot.html#define-means-and-standard-errors",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Define means and standard errors",
+    "text": "Define means and standard errors\n\n\nCode\nset.seed(123)\n\nmean_male &lt;- 175.3 # for all groups 20+\nmean_female &lt;- 161.3 # for all groups 20+\nse_male &lt;- 0.19 # n = 5,092\nse_female &lt;- 0.19 # n = 5,510\nsd_male &lt;- 13.6\nsd_female &lt;- 14.1\nn_male &lt;- 5092 # sample size\nn_female &lt;- 5510 # sample size\nsamp_n &lt;- 30"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#generate-sample-height-data-for-males-in-cm",
+    "href": "barplot_scatterplot.html#generate-sample-height-data-for-males-in-cm",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Generate sample height data for males in cm",
+    "text": "Generate sample height data for males in cm\n\n\nCode\n# Generate sample height data for males in cm\nheights_male &lt;- rnorm(n = samp_n, mean = mean_male, sd = sd_male) # use estimates from larger sample, pull n = samp_n\n\n# Generate sample height data for females in cm\nheights_female &lt;- rnorm(n = samp_n, mean = mean_female, sd = sd_female) # use estimates from larger sample, pull n = samp_n\n\n# Combine data into a data frame\nheight_data &lt;- data.frame(\n  Sex = factor(c(rep(0, samp_n), rep(1, samp_n))),  # Convert to numeric: 1 for Male, 0 for Female\n  Height = c(heights_female, heights_male)\n)\n\n# Generate sample height data for males for larger sample in cm\nheights_male_larger &lt;- rnorm(n = n_male, mean = mean_male, sd = sd_male) #use estimates from larger sample\n\n# Generate sample height data for females in cm\nheights_female_larger &lt;- rnorm(n = n_female, mean = mean_female, sd = sd_female) #use estimates from larger sample\n\n# Combine data into a data frame\nheight_data_larger &lt;- data.frame(\n  Sex = factor(c(rep(0, n_female), rep(1, n_male))),  # Convert to numeric: 1 for Male, 0 for Female\n  Height = c(heights_female_larger, heights_male_larger)\n)"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#perform-the-t-test-and-compute-cohens-d",
+    "href": "barplot_scatterplot.html#perform-the-t-test-and-compute-cohens-d",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Perform the t-test and compute Cohen’s d",
+    "text": "Perform the t-test and compute Cohen’s d\n\n\nCode\n# Perform the t-test\nt_test_result &lt;- t.test(Height ~ Sex, data = height_data, var.equal = TRUE)\n# Compute Cohen's d\ncohen_d &lt;- cohens_d(Height ~ Sex, data = height_data, var.equal = TRUE)\n\n# Perform the t-test\nt_test_result_larger &lt;- t.test(Height ~ Sex, data = height_data_larger, var.equal = TRUE)\n# Compute Cohen's d\ncohen_d_larger&lt;-cohens_d(Height ~ Sex, data = height_data_larger, var.equal = TRUE)"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#prepare-data-for-plotting",
+    "href": "barplot_scatterplot.html#prepare-data-for-plotting",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Prepare data for plotting",
+    "text": "Prepare data for plotting\n\n\nCode\n# Extract the means and standard deviations from the t-test result\nmeans_male &lt;- t_test_result$estimate[1]\nmeans_female &lt;- t_test_result$estimate[2]\n\n# Subset data for males and females\nmale_heights &lt;- height_data$Height[height_data$Sex == 1]\nfemale_heights &lt;- height_data$Height[height_data$Sex == 0]\n\n# Reverse the order of levels in the Species variable\nheight_data$Sex &lt;- factor(height_data$Sex, levels = levels(height_data$Sex))\n\n# Define Ravenclaw inspired colors\n#ravenclaw_colors &lt;- c(\"#B0B7BC\", \"#222F5B\")  # Silver and Blue (if you want to go with the movie colors)\nravenclaw_colors &lt;- c(\"#B08D57\", \"#222F5B\")  # Bronze and Blue (if you want to go with the book colors)"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#plot-the-data-for-the-barplot.",
+    "href": "barplot_scatterplot.html#plot-the-data-for-the-barplot.",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Plot the data for the barplot.",
+    "text": "Plot the data for the barplot.\n\n\nCode\n# Plot the barplot with error bars\np_bar &lt;- ggplot(height_data, aes(x = Sex, y = Height, fill = Sex)) +\n  geom_bar(stat = \"summary\", fun = \"mean\", color = \"black\", width = 0.4) +  # Adjust width here\n  geom_errorbar(stat = \"summary\", fun.data = \"mean_cl_boot\", width = 0.1, color = \"black\") +\n  geom_text(x = 0.5, y = max(height_data$Height) + 3, \n  label = paste(\"t(\", t_test_result$parameter, \") = \", abs(round(t_test_result$statistic, 2)), \", p = \", round(t_test_result$p.value, 3), sep = \"\"), \n  size = 6, color = \"black\", vjust = 0, hjust = -.55) +\n  labs(x = \"Sex\", y = \"Mean Height (cm)\", title = \"Mean Height by Sex\") +\n  scale_fill_manual(values = ravenclaw_colors, labels = c(\"Female\", \"Male\")) +  # Use Ravenclaw colors\n  scale_x_discrete(labels = c(\"Female\", \"Male\")) +\n  scale_y_continuous(expand = c(0,0),\n                     limits = c(0,max(height_data$Height) + 15)) +\n  theme_bw() +  # Set background theme to black and white\n  theme(text = element_text(size = 18),  # Increase text size\n        panel.border = element_blank(),  # Remove panel border\n        panel.grid.minor = element_blank(),  # Remove major grid lines\n        axis.line.x = element_line(), axis.line.y = element_line())\n\nprint(p_bar)\n\n\n\n\n\n\n\n\n\nCode\n# Save the barplot as a TIFF file with dimensions 9 x 6 inches\nggsave(filename = \"barplot_height_by_sex.tiff\", plot = p_bar, width = 9, height = 6, dpi = 600)"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#conduct-a-regression-and-comput-correlation",
+    "href": "barplot_scatterplot.html#conduct-a-regression-and-comput-correlation",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Conduct a regression and comput correlation",
+    "text": "Conduct a regression and comput correlation\n\n\nCode\n# Perform linear regression\nlm_model &lt;- lm(Height ~ Sex, data = height_data)\nprint(\"\\nResults of linear regression:\")\n\n\n[1] \"\\nResults of linear regression:\"\n\n\nCode\nsummary(lm_model)\n\n\n\nCall:\nlm(formula = Height ~ Sex, data = height_data)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-26.105  -7.865  -1.546   7.679  28.068 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  163.815      2.297  71.306  &lt; 2e-16 ***\nSex1          10.845      3.249   3.338  0.00148 ** \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 12.58 on 58 degrees of freedom\nMultiple R-squared:  0.1611,    Adjusted R-squared:  0.1467 \nF-statistic: 11.14 on 1 and 58 DF,  p-value: 0.001478\n\n\nCode\n# Compute correlation coefficients and p-values\ncorr_result &lt;- cor.test(height_data$Height, as.numeric(height_data$Sex))\nprint(\"Results of correlation test:\")\n\n\n[1] \"Results of correlation test:\"\n\n\nCode\nprint(corr_result)\n\n\n\n    Pearson's product-moment correlation\n\ndata:  x and y\nt = 3.338, df = 58, p-value = 0.001478\nalternative hypothesis: true correlation is not equal to 0\n95 percent confidence interval:\n 0.1642482 0.5947323\nsample estimates:\n      cor \n0.4014306"
+  },
+  {
+    "objectID": "barplot_scatterplot.html#plot-the-scatterplot-with-linear-regression-line",
+    "href": "barplot_scatterplot.html#plot-the-scatterplot-with-linear-regression-line",
+    "title": "Barplot and Scatterplot Comparing Sex Differences in Height",
+    "section": "Plot the scatterplot with linear regression line",
+    "text": "Plot the scatterplot with linear regression line\n\n\nCode\np_scatter &lt;- ggplot(height_data, aes(x = as.numeric(Sex), y = Height, color = Sex)) +\ngeom_point(alpha = 0.6, position = position_jitter(width = 0.02, height = 0), size = 3) +  # Larger dots\ngeom_smooth(method = \"lm\", se = TRUE, color = \"black\") +\ngeom_text(x = 0.5, y = max(height_data$Height) + 3,\nlabel = paste(\"β = \", round(lm.beta(lm_model)$standardized.coefficients[2], 2), \", t(\", lm_model$df.residual, \") = \", round(summary(lm_model)$coefficients[2, 3], 2),\n\", p = \", round(summary(lm_model)$coefficients[2, 4], 3), sep = \"\"),\nvjust = -0.5, hjust = -0.25, size = 6, color = \"black\") +\nlabs(x = \"Sex\", y = \"Height (cm)\", title = \"Height by Sex\") +\nscale_color_manual(values = ravenclaw_colors, labels = c(\"Female\", \"Male\")) +  # Use Ravenclaw colors\nscale_x_discrete(labels = c(\"Female\", \"Male\")) +\ncoord_cartesian(ylim = c(150, max(height_data$Height) + 10)) +  # Adjust y-axis limits\ntheme_bw() +  # Set background theme to black and white\n  theme(text = element_text(size = 18),  # Increase text size\n        panel.border = element_blank(),  # Remove panel border\n        panel.grid.minor = element_blank(),  # Remove major grid lines\n        axis.line.x = element_line(), axis.line.y = element_line())\n\nprint(p_scatter)\n\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\n\n\nCode\n# Save the scatterplot as a TIFF file\nggsave(filename = \"scatterplot_height_by_sex.tiff\", plot = p_scatter, width = 9, height = 6, dpi = 600)\n\n\n`geom_smooth()` using formula = 'y ~ x'"
+  },
+  {
+    "objectID": "power_curves.html",
+    "href": "power_curves.html",
+    "title": "Plots of Power Curves",
+    "section": "",
+    "text": "Code\nlibrary(ggplot2)\nlibrary(pwr)\nlibrary(patchwork)"
+  },
+  {
+    "objectID": "power_curves.html#load-required-libraries",
+    "href": "power_curves.html#load-required-libraries",
+    "title": "Plots of Power Curves",
+    "section": "",
+    "text": "Code\nlibrary(ggplot2)\nlibrary(pwr)\nlibrary(patchwork)"
+  },
+  {
+    "objectID": "power_curves.html#give-range-of-correlations-range-of-cohens-d-and-power-values",
+    "href": "power_curves.html#give-range-of-correlations-range-of-cohens-d-and-power-values",
+    "title": "Plots of Power Curves",
+    "section": "Give range of correlations, range of Cohen’s d, and power values",
+    "text": "Give range of correlations, range of Cohen’s d, and power values\n\n\nCode\n# range of correlations\nr &lt;- seq(.02, .1, .001)\nnr &lt;- length(r)\n\n# range of Cohen's d\nd &lt;- seq(.02, 0.2, length.out = nr)  # Adjusted range for Cohen's d\nnd &lt;- length(d)\n\n# power values\np &lt;- c(.80, .99)\nnp &lt;- length(p)"
+  },
+  {
+    "objectID": "power_curves.html#obtain-sample-sizes",
+    "href": "power_curves.html#obtain-sample-sizes",
+    "title": "Plots of Power Curves",
+    "section": "Obtain Sample Sizes",
+    "text": "Obtain Sample Sizes\n\n\nCode\n# obtain sample sizes for Pearson's correlation coefficient\nsamsize_r &lt;- array(numeric(nr*np), dim=c(nr,np))\nfor (i in 1:np){\n    for (j in 1:nr){\n        result &lt;- pwr.r.test(n = NULL, r = r[j],\n                             sig.level = .05, power = p[i],\n                             alternative = \"two.sided\")\n        samsize_r[j,i] &lt;- ceiling(result$n)\n    }\n}\n\n# obtain sample sizes for Cohen's d\nsamsize_d &lt;- array(numeric(nd*np), dim=c(nd,np))\nfor (i in 1:np){\n    for (j in 1:nd){\n        result &lt;- pwr.t.test(n = NULL, d = d[j],\n                             sig.level = .05, power = p[i],\n                             alternative = \"two.sided\")\n        samsize_d[j,i] &lt;- ceiling(result$n)\n    }\n}"
+  },
+  {
+    "objectID": "power_curves.html#create-dataframes-for-ggplot-for-pearsons-correlation-and-cohens-d",
+    "href": "power_curves.html#create-dataframes-for-ggplot-for-pearsons-correlation-and-cohens-d",
+    "title": "Plots of Power Curves",
+    "section": "Create dataframes for ggplot for Pearson’s correlation and Cohen’s d",
+    "text": "Create dataframes for ggplot for Pearson’s correlation and Cohen’s d\n\n\nCode\n# create dataframe for ggplot for Pearson's correlation coefficient\ndf_r &lt;- data.frame(r = rep(r, np), samsize = c(samsize_r[,1], samsize_r[,2]), \n                   power = rep(p, each = nr), measure = \"Pearson's r\")\n\n# create dataframe for ggplot for Cohen's d\ndf_d &lt;- data.frame(d = rep(d, np), samsize = c(samsize_d[,1], samsize_d[,2]), \n                   power = rep(p, each = nd), measure = \"Cohen's d\")\n\n# Rename columns in df_d to match df_r\nnames(df_d) &lt;- c(\"r\", \"samsize\", \"power\", \"measure\")\n\n# Combine data frames\ndf_combined &lt;- rbind(df_r, df_d)"
+  },
+  {
+    "objectID": "power_curves.html#plotting",
+    "href": "power_curves.html#plotting",
+    "title": "Plots of Power Curves",
+    "section": "Plotting",
+    "text": "Plotting\n\n\nCode\n# Define Hufflepuff colors\nhufflepuff_colors &lt;- c(\"#FFDD00\", \"#000000\")\n# Plot for Pearson's correlation coefficient\nplot_r &lt;- ggplot(df_r, aes(x = r, y = samsize, color = factor(power))) +\n    geom_line(linewidth = 1) +\n    scale_color_manual(values = hufflepuff_colors) +\n    labs(x = \"Correlation Coefficient |r|\",\n         y = \"Sample Size (n)\",\n         color = \"Power\",\n         title = \"Power as a Function of Sample Size for r\") +\n    theme_minimal() +\n    geom_hline(yintercept = 11865, linetype = \"dashed\", color = \"black\") +\n    scale_y_continuous(breaks = seq(0, 45000, by = 2500)) +\n    scale_x_continuous(breaks = seq(0, 0.1, by = 0.01)) + # Adjusted x-axis breaks\n    theme(legend.position = \"none\", text = element_text(size = 16))  # Adjust font size here"
+  },
+  {
+    "objectID": "power_curves.html#more-plotting",
+    "href": "power_curves.html#more-plotting",
+    "title": "Plots of Power Curves",
+    "section": "More Plotting",
+    "text": "More Plotting\n\n\nCode\n# Plot for Cohen's d\nplot_d &lt;- ggplot(df_d, aes(x = r, y = samsize, color = factor(power))) +\n    geom_line(linewidth = 1) +\n    scale_color_manual(values = hufflepuff_colors) +\n    labs(x = \"Cohen's d\",\n         y = \"Sample Size (n)\",\n         color = \"Power\",\n         title = \"Power as a Function of Sample Size for Cohen's d\") +\n    theme_minimal() +\n    geom_hline(yintercept = 11865, linetype = \"dashed\", color = \"black\") +\n    scale_y_continuous(breaks = seq(0, 100000, by = 5000)) +\n    scale_x_continuous(breaks = seq(0, .2, by = 0.05)) + # Adjusted x-axis breaks\n    theme(legend.position = \"none\", text = element_text(size = 16))  # Adjust font size here"
+  },
+  {
+    "objectID": "power_curves.html#combine-plots-and-save-if-needed",
+    "href": "power_curves.html#combine-plots-and-save-if-needed",
+    "title": "Plots of Power Curves",
+    "section": "Combine Plots and Save if Needed",
+    "text": "Combine Plots and Save if Needed\n\n\nCode\n# Combine plots using patchwork\ncombined_plot &lt;- plot_r + plot_d + plot_layout(ncol = 2)\n\n# Add single legend at the bottom\ncombined_plot &lt;- combined_plot + theme(legend.position = \"right\", text = element_text(size = 16))\n\n# Display the combined plot\nprint(combined_plot)\n\n\n\n\n\n\n\n\n\nCode\n# Save the combined plot to a .tiff file with 600 dpi resolution\nggsave(\"combined_plot.tiff\", plot = combined_plot, dpi = 600)\n\n\nSaving 7 x 5 in image\n\n\nCode\n# Save the combined plot to a .eps file\nggsave(\"combined_plot.eps\", plot = combined_plot, device = \"eps\")\n\n\nSaving 7 x 5 in image"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Meaningful Associations Redux",
+    "section": "",
+    "text": "Barplot and Scatterplot Comparing Sex Differences in Height\nPlots of Confidence Interval Distributions by Sample Size (replicating Halsey et al., 2015)\nPlots of Power Curves\nEffect Size Overlap Plots"
+  }
+]

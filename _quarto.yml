@@ -1,0 +1,23 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Meaningful Associations Redux"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: barplot_scatterplot.qmd
+        text: Sex × Height
+      - href: halsey_simulation.qmd
+        text: Halsey CIs
+      - href: power_curves.qmd
+        text: Power Curves
+      - href: effect_size_overlap.qmd
+        text: Overlap Plot
+
+format:
+  html:
+    theme: cosmo
+    toc: true
